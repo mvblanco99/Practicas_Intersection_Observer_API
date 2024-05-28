@@ -1,23 +1,37 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import ItemImages from './ItemImages';
-import useFetch from '../../hooks/useFetch.hook';
 import { ENDPOINTAPIPIXABAY } from '../../config';
+import { PixabayApiResponse } from '../../types/PixabayApiResponse';
+import { fetchData } from '../../services/some_common-sevices/fetchData.services';
 
 const ListImages = () => {
-  const {data} = useFetch(ENDPOINTAPIPIXABAY);
-  const urlImages = data?.hits.map(item => item?.webformatURL)
-  const onIntersection = (entries,self) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.src = img.dataset.src;
-        self.unobserve(img);
-      }
-    });
-  };
+  const [urlImages, setUrlImages] = useState<string[]>([]);
+  
+  const onIntersection = (
+    entries:IntersectionObserverEntry[], 
+    self:IntersectionObserver ) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target as HTMLImageElement;
+          img.src = `${img.dataset.src}`;
+          self.unobserve(img);
+        }
+      });
+    };
 
   useEffect(() => {
-    let observer = null;
+    const wrapper = async () => {
+      const res:PixabayApiResponse = await fetchData(ENDPOINTAPIPIXABAY);
+      setUrlImages(urlImages => {
+        const urls = res?.hits.map(item => item?.webformatURL)
+        return [...urlImages, ...urls];
+      })
+    }
+    wrapper();
+  },[])  
+
+  useEffect(() => {
+    let observer:IntersectionObserver|null|undefined = null;
     
     if(urlImages?.length > 0){
       const options = {
@@ -29,14 +43,14 @@ const ListImages = () => {
       const images = document.querySelectorAll('[data-src]');
 
       images.forEach(img => {
-        observer.observe(img);
+        observer?.observe(img);
       });
     }
 
     return () => {
       if(observer) observer.disconnect();
     }
-  },[data]);
+  },[urlImages]);
 
   return (
     <>
