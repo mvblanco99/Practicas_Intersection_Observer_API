@@ -1,2 +1,2 @@
 export const ENDPOINTAPIPIXABAY = 'https://pixabay.com/api/?key=44038457-aff91731b6e66908a11773dbe&q=yellow+flowers&image_type=photo&pretty=true';
-export const ENDPOINTPOKEAPI = (offset:number) => `https://pokeapi.co/api/v2/pokemon/?limit=20&offset=20`;
+export const ENDPOINTPOKEAPI = `https://pokeapi.co/api/v2/pokemon/?limit=20&offset=20`;
